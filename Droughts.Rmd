@@ -1,0 +1,257 @@
+---
+title: "Drought Modeling for the United States"
+author: "Hailey Brookins"
+date: "30 April 2020"
+output: html_notebook
+---
+
+## Introduction
+
+
+
+## Research Question(s)
+
+What weather factors can be used to predict droughts?
+
+## Load Libraries
+
+Load libraries.
+
+```{r, message = FALSE}
+library(readr)
+drought <- read_csv("drought.csv")
+drought_validation <- read_csv("drought_validation.csv")
+library(ggplot2)
+library(ISLR)
+library(GGally)
+library(ggcorrplot)
+library(broom)
+library(caret)
+library(MASS)
+library(class)
+library(mosaic)
+library(pROC)
+library(plotROC)
+library(glmnet)
+library(ggfortify)
+library(effectsize)
+```
+
+## Exploratory Data Analysis
+
+```{r}
+droughts <- na.omit(drought)
+print(droughts)
+```
+
+```{r}
+ggplot(data = droughts, aes(x = score)) + geom_histogram() + labs(x = "Droughts", title = "Count of Droughts in US from 2012-2020")
+```
+
+```{r}
+ggplot(data = droughts, aes(x = QV2M, y = score)) + geom_point(size = 0.05, alpha = 0.25) + labs(x = "Specific Humidity at 2 Meters (g/kg)", y = "Drought Severity", title = "Humidity and Droughts")
+```
+```{r}
+ggplot(data = droughts, aes(x = T2M, y = score)) + geom_point(size = 0.05, alpha = 0.25) + labs(x = "Temperature at 2 Meters (C)", y = "Drought Severity", title = "Temperature and Droughts")
+```
+
+```{r}
+ggplot(data = droughts, aes(x = PS, y = score)) + geom_point(size = 0.05, alpha = 0.25) + labs(x = "Surface Pressure (kPa)", y = "Drought Severity", title = "Surface Pressure and Droughts")
+```
+```{r}
+ggplot(data = droughts, aes(x = T2MDEW, y = score)) + geom_point(size = 0.05, alpha = 0.25) + labs(x = "Dew/Frost Point at 2 Meters (C)", y = "Drought Severity", title = "Dew/Frost Point and Droughts")
+```
+
+```{r}
+ggplot(data = droughts, aes(x = log(PRECTOT), y = score)) + geom_jitter(size = 0.05, alpha = 0.25) + labs(x = "Precipitation (mm/day)", y = "Drought Severity", title = "Precipitation and Droughts")
+```
+
+```{r}
+droughts <- droughts %>%
+  mutate(score_r = round(score))
+  table(droughts$score_r)
+```
+```{r}
+summary(droughts$score)
+```
+`
+```{r}
+droughts %>%
+  filter(score > 4) %>%
+  ggplot(aes(x = score)) + geom_histogram()
+```
+
+
+
+
+
+
+
+## Ordinal Logistic Regression
+
+```{r}
+droughts_copy <- droughts
+
+droughts_copy %>%
+      filter(score_r > 0)
+
+score_olr <- factor(droughts_copy$score_r, levels = c(1, 2, 3, 4, 5), labels = c("D0", "D1", "D2", "D3", "D4") )
+```
+
+```{r}
+droughts_olr <- polr(score_olr ~ PRECTOT +	PS +	QV2M +	T2M +	T2MDEW +	T2MWET +	T2M_MAX +	T2M_MIN +	T2M_RANGE +	TS + 	WS10M	+ WS10M_MAX	+ WS10M_MIN +	WS10M_RANGE +	WS50M +	WS50M_MAX +	WS50M_MIN	+ WS50M_RANGE, data = droughts, Hess=TRUE)
+summary(droughts_olr)
+```
+
+```{r}
+drotable <- coef(summary(droughts_olr))
+```
+
+```{r}
+p <- pnorm(abs(drotable[, "t value"]), lower.tail = FALSE) * 2
+drotable <- cbind(drotable, "p value" = p)
+drotable
+```
+
+```{r}
+ci <- confint(droughts_olr)
+```
+
+```{r}
+exp(coef(droughts_olr))
+```
+
+```{r}
+exp(cbind(OR = coef(droughts_olr), ci))
+```
+
+
+
+
+
+
+
+
+
+
+```{r}
+print(droughts)
+```
+
+
+
+
+
+
+
+
+## Lasso Regression
+
+
+```{r}
+# Standardize Variables
+
+droughts$WS50M_RANGE <- (droughts$WS50M_RANGE - mean(droughts$WS50M_RANGE))/sd(droughts$WS50M_RANGE)
+
+droughts$WS50M_MIN <- (droughts$WS50M_MIN - mean(droughts$WS50M_MIN))/sd(droughts$WS50M_MIN)
+
+droughts$WS50M_MAX <- (droughts$WS50M_MAX - mean(droughts$WS50M_MAX))/sd(droughts$WS50M_MAX)
+
+droughts$WS50M <- (droughts$WS50M - mean(droughts$WS50M))/sd(droughts$WS50M)
+
+droughts$WS10M_RANGE <- (droughts$WS10M_RANGE - mean(droughts$WS10M_RANGE))/sd(droughts$WS10M_RANGE)
+
+droughts$WS10M_MIN <- (droughts$WS10M_MIN - mean(droughts$WS10M_MIN))/sd(droughts$WS10M_MIN)
+
+droughts$WS10M_MAX <- (droughts$WS10M_MAX - mean(droughts$WS10M_MAX))/sd(droughts$WS10M_MAX)
+
+droughts$WS10M <- (droughts$WS10M - mean(droughts$WS10M))/sd(droughts$WS10M)
+
+droughts$TS <- (droughts$TS - mean(droughts$TS))/sd(droughts$TS)
+
+droughts$T2M_RANGE <- (droughts$T2M_RANGE - mean(droughts$T2M_RANGE))/sd(droughts$T2M_RANGE)
+
+droughts$T2M_MIN <- (droughts$T2M_MIN - mean(droughts$T2M_MIN))/sd(droughts$T2M_MIN)
+
+droughts$T2M_MAX <- (droughts$T2M_MAX - mean(droughts$T2M_MAX))/sd(droughts$T2M_MAX)
+
+droughts$T2MWET <- (droughts$T2MWET - mean(droughts$T2MWET))/sd(droughts$T2MWET)
+
+droughts$T2MDEW <- (droughts$T2MDEW - mean(droughts$T2MDEW))/sd(droughts$T2MDEW)
+
+droughts$T2M <- (droughts$T2MDEW - mean(droughts$T2MDEW))/sd(droughts$T2MDEW)
+
+droughts$QV2M <- (droughts$QV2M - mean(droughts$QV2M))/sd(droughts$QV2M)
+
+droughts$PS <- (droughts$PS - mean(droughts$PS))/sd(droughts$PS)
+
+droughts$PRECTOT <- (droughts$PRECTOT - mean(droughts$PRECTOT))/sd(droughts$PRECTOT)
+```
+
+
+```{r}
+droughts_lr <-droughts[ -c(22)]
+```
+
+```{r}
+print(droughts_lr)
+```
+
+```{r}
+train_rows <- createDataPartition(droughts_lr$score, p = 0.5, list = FALSE)
+droughts_train <- droughts_lr[train_rows, ]
+droughts_test <- droughts_lr[-train_rows, ]
+```
+
+```{r}
+X  <- model.matrix(score ~ ., data = droughts)
+y <- droughts$score
+```
+
+```{r}
+X_train <- model.matrix(score ~ ., data = droughts_train)
+X_train <- X_train[]
+
+y_train <- droughts_train$score
+
+X_test <- model.matrix(score ~ ., data = droughts_lr)
+X_test <- X_test[]
+
+y_test <- droughts_test$score
+```
+
+```{r}
+grid <- 10^seq(from = 10, to = -2, length = 100)
+
+lasso_mod_train <- glmnet(X_train, y_train, alpha = 1,
+                          lambda = grid, thresh = 1e-12)
+autoplot(lasso_mod_train, xvar = "lambda")
+```
+```{r}
+set.seed(1)
+cv_out_lasso <- cv.glmnet(X_train, y_train, alpha = 1)
+autoplot(cv_out_lasso)
+```
+```{r}
+best_lambda_lasso <- cv_out_lasso$lambda.min
+best_lambda_lasso
+```
+```{r}
+lasso_pred4 <- predict(lasso_mod_train, s = best_lambda_lasso, newx = X_test)
+mean((lasso_pred4 - y_test)^2)
+```
+```{r}
+lasso_mod_final <- glmnet(X, y, alpha = 1)
+lasso_predict <- predict(lasso_mod_final, type= "coefficients", s = best_lambda_lasso)
+lasso_predict
+```
+```{r}
+tidy(lasso_predict)
+```
+
+
+## Questions:
+
+
+Test error of lasso regression?
+

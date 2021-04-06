@@ -19,8 +19,8 @@ Load libraries.
 
 ```{r, message = FALSE}
 library(readr)
-drought <- read_csv("drought.csv")
-drought_validation <- read_csv("drought_validation.csv")
+droughts <- read_csv("Droughts1.csv")
+View(droughts)
 library(ggplot2)
 library(ISLR)
 library(GGally)
@@ -40,12 +40,12 @@ library(effectsize)
 ## Exploratory Data Analysis
 
 ```{r}
-droughts <- na.omit(drought)
+droughts <- na.omit(droughts)
 print(droughts)
 ```
 
 ```{r}
-ggplot(data = droughts, aes(x = score)) + geom_histogram() + labs(x = "Droughts", title = "Count of Droughts in US from 2012-2020")
+ggplot(data = droughts, aes(x = score)) + geom_histogram() + labs(x = "Droughts", title = "Count of Droughts in US from 2019-2020")
 ```
 
 ```{r}
@@ -89,11 +89,10 @@ droughts %>%
 
 ## Ordinal Logistic Regression
 
+
 ```{r}
 droughts_copy <- droughts
 
-droughts_copy %>%
-      filter(score_r > 0)
 
 score_olr <- factor(droughts_copy$score_r, levels = c(1, 2, 3, 4, 5), labels = c("D0", "D1", "D2", "D3", "D4") )
 ```
@@ -114,7 +113,7 @@ drotable
 ```
 
 ```{r}
-ci <- confint(droughts_olr)
+ci <- confint.default(droughts_olr)
 ```
 
 ```{r}
@@ -125,7 +124,15 @@ exp(coef(droughts_olr))
 exp(cbind(OR = coef(droughts_olr), ci))
 ```
 
+Interpretations of odds ratios:
 
+1. For every 
+2.
+3. 
+4. 
+5. 
+6. 
+7. 
 
 
 

@@ -1,0 +1,61 @@
+---
+title: "Drought Modeling for the United States"
+author: "Hailey Brookins"
+date: "30 April 2020"
+output: html_notebook
+---
+
+## Abstract
+
+With rising global temperatures increasing globally due to climate change, regions that are far from storm tracks are at an increased risk of experiencing drought. If droughts were more predictable, resource managers could make educated decisions about water allocation to reduce their effects including economic instability, crop destruction, and loss of wildlife habitat. Two regression models were created that use meteorological data to predict the occurrence and severity of drought events. An ordinal regression model was compared to a lasso regression model to determine which was better at predicting drought events. The data for these models was collected and compiled by the United States Drought Monitor, and includes over 300,000 days with eighteen columns of weather indicators including temperature, humidity, and precipitation. It is hypothesized that weather indicators could be used to predict the occurrence and severity of drought events. At the models’ current stages, it appears that precipitation, minimum wind speed at 50 meters, and minimum wind speed at 50 meters are the most predictive of drought severity. 
+
+YOU NEED TO REWRITE THIS ENDING AFTER YOU FINISH RESULTS
+
+## Load Libraries
+
+Load libraries.
+
+```{r, message = FALSE}
+library(readr)
+droughts <- read_csv("Droughts1.csv")
+View(droughts)
+library(ggplot2)
+library(ISLR)
+library(GGally)
+library(ggcorrplot)
+library(broom)
+library(caret)
+library(MASS)
+library(class)
+library(mosaic)
+library(pROC)
+library(plotROC)
+library(glmnet)
+library(ggfortify)
+library(effectsize)
+```
+
+## Introduction
+
+Droughts are a natural part of the climate cycle. However, it is becoming increasingly important that we understand their full causes and effects as climate change is exacerbating drought conditions in several regions of the world. In the United States, for example, the Southwest is at particularly high risk for droughts. 
+
+Climate change contributes to drought in several ways. Firstly, warmer temperatures increase the amount of water that evaporates from soil. Climate change is also altering atmospheric “rivers” where water moves through the atmosphere which alters precipitation patterns. Predicting future precipitation levels is not an exact science, but climatologists predict that with a warming climate, wet regions will get wetter and dry regions will get drier. In other words, at the climate gets warmer, droughts in dry regions will become even more severe.
+
+This increase in drought severity is important because droughts have a range of detrimental effects, including losses in agriculture, water supply, energy production, public health, wildlife, and increased wildfire severity. 
+As the climate warms and droughts become more common, these effects will become even more severe. 
+
+Droughts, unlike other natural disasters, can be hard to identify. Droughts are defined as periods of drier than normal conditions for a given area. In some parts of the world, 4 inches of rain per year is normal. In others, you can expect 50 inches of rain per year. So, droughts look very different in different regions. In other words, there isn’t one amount of precipitation that indicates a drought in any region of the world. This subjectivity can make droughts hard to identify and quantify. The authors of the US Drought Monitor are addressing this challenge by comparing current precipitation levels to climatological averages.
+
+The U.S. Drought Monitor is a map that comes out every week that classifies the areas of the US that are experiencing drought. It is not a forecast, but rather a measurement of the drought conditions of the past week. There are 5 categories, D0 to D4, that increase in severity. The D0 category indicates regions that are abnormally dry. This category is often used for areas that going into or coming out of a more severe drought, and indicates short-term dryness. D1 indicates moderate drought, during which there will be some damage to crops and pastures, streams, reservoirs, or wells are low, and people will be asked to voluntarily use less water. D2 droughts are severe, and mean that water shortages are common and water restrictions will be imposed. The D3 category indicates extreme drought conditions, during which there will be severe crop and pasture losses and widespread water shortages. The last category, D4, is exceptional drought which indicates widespread crop and pasture loss and emergency water shortages. 
+
+The authors of this map determine the weekly classifications for each region by synthesizing several inputs including the Palmer Drought Severity Index, the Standardized Precipitation Index, and other climatological inputs; the Keech-Byram Drought Index for fire, satellite-based assessments of vegetation health, and various indicators of soil moisture; and hydrologic data like the Surface Water Supply Index and snowpack data. 
+
+The map is jointly produced by the National Drought Mitigation Center at the University of Nebraska-Lincoln, the United States Department of Agriculture, and the National Oceanic and Atmospheric Administration. 
+
+
+## Exploratory Data Analysis
+
+```{r}
+droughts <- na.omit(droughts)
+print(droughts)
+```

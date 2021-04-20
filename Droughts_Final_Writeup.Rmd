@@ -7,9 +7,8 @@ output: html_notebook
 
 ## Abstract
 
-With rising global temperatures increasing globally due to climate change, regions that are far from storm tracks are at an increased risk of experiencing drought. If droughts were more predictable, resource managers could make educated decisions about water allocation to reduce their effects including economic instability, crop destruction, and loss of wildlife habitat. Two regression models were created that use meteorological data to predict the occurrence and severity of drought events. An ordinal regression model was compared to a lasso regression model to determine which was better at predicting drought events. The data for these models was collected and compiled by the United States Drought Monitor, and includes over 300,000 days with eighteen columns of weather indicators including temperature, humidity, and precipitation. It is hypothesized that weather indicators could be used to predict the occurrence and severity of drought events. At the models’ current stages, it appears that precipitation, minimum wind speed at 50 meters, and minimum wind speed at 50 meters are the most predictive of drought severity. 
+With rising global temperatures increasing globally due to climate change, regions that are far from storm tracks are at an increased risk of experiencing drought. If droughts were more predictable, resource managers could make educated decisions about water allocation to reduce their effects including economic instability, crop destruction, and loss of wildlife habitat. Two regression models were created that use meteorological data to predict the occurrence and severity of drought events. An ordinal regression model was compared to a lasso regression model to determine which was better at predicting drought events. The data for these models was collected and compiled by the United States Drought Monitor, and includes over 300,000 days with eighteen columns of weather indicators including temperature, humidity, and precipitation. The models found the same negative relationship between wind speed and drought severity, but found opposite relationships between precipitation and temperature and drought severity. These models can be used to predict drought severity and inform water and other resource managers.
 
-YOU NEED TO REWRITE THIS ENDING AFTER YOU FINISH RESULTS
 
 ## Load Libraries
 
@@ -39,23 +38,286 @@ library(effectsize)
 
 Droughts are a natural part of the climate cycle. However, it is becoming increasingly important that we understand their full causes and effects as climate change is exacerbating drought conditions in several regions of the world. In the United States, for example, the Southwest is at particularly high risk for droughts. 
 
-Climate change contributes to drought in several ways. Firstly, warmer temperatures increase the amount of water that evaporates from soil. Climate change is also altering atmospheric “rivers” where water moves through the atmosphere which alters precipitation patterns. Predicting future precipitation levels is not an exact science, but climatologists predict that with a warming climate, wet regions will get wetter and dry regions will get drier. In other words, at the climate gets warmer, droughts in dry regions will become even more severe.
+Climate change contributes to drought in several ways. Firstly, warmer temperatures increase the amount of water that evaporates from soil. Climate change is also altering atmospheric “rivers” where water moves through the atmosphere which alters precipitation patterns. Predicting future precipitation levels is not an exact science, but climatologists predict that with a warming climate, wet regions will get wetter and dry regions will get drier. In other words, at the climate gets warmer, droughts in dry regions will become even more severe (“Drought and Climate Change,” 2020).
 
 This increase in drought severity is important because droughts have a range of detrimental effects, including losses in agriculture, water supply, energy production, public health, wildlife, and increased wildfire severity. 
-As the climate warms and droughts become more common, these effects will become even more severe. 
+As the climate warms and droughts become more common, these effects will become even more severe (Wolchover 2018). 
 
-Droughts, unlike other natural disasters, can be hard to identify. Droughts are defined as periods of drier than normal conditions for a given area. In some parts of the world, 4 inches of rain per year is normal. In others, you can expect 50 inches of rain per year. So, droughts look very different in different regions. In other words, there isn’t one amount of precipitation that indicates a drought in any region of the world. This subjectivity can make droughts hard to identify and quantify. The authors of the US Drought Monitor are addressing this challenge by comparing current precipitation levels to climatological averages.
+Droughts, unlike other natural disasters, can be hard to identify. Droughts are defined as periods of drier than normal conditions for a given area. In some parts of the world, 4 inches of rain per year is normal. In others, you can expect 50 inches of rain per year. So, droughts look very different in different regions. In other words, there isn’t one amount of precipitation that indicates a drought in any region of the world. This subjectivity can make droughts hard to identify and quantify (“Droughts: Things to Know.”). The authors of the US Drought Monitor are addressing this challenge by comparing current precipitation levels to climatological averages.
 
-The U.S. Drought Monitor is a map that comes out every week that classifies the areas of the US that are experiencing drought. It is not a forecast, but rather a measurement of the drought conditions of the past week. There are 5 categories, D0 to D4, that increase in severity. The D0 category indicates regions that are abnormally dry. This category is often used for areas that going into or coming out of a more severe drought, and indicates short-term dryness. D1 indicates moderate drought, during which there will be some damage to crops and pastures, streams, reservoirs, or wells are low, and people will be asked to voluntarily use less water. D2 droughts are severe, and mean that water shortages are common and water restrictions will be imposed. The D3 category indicates extreme drought conditions, during which there will be severe crop and pasture losses and widespread water shortages. The last category, D4, is exceptional drought which indicates widespread crop and pasture loss and emergency water shortages. 
+The U.S. Drought Monitor is a map that comes out every week that classifies the areas of the US that are experiencing drought. It is not a forecast, but rather a measurement of the drought conditions of the past week. There are 5 categories, D0 to D4, that increase in severity. The D0 category indicates regions that are abnormally dry. This category is often used for areas that going into or coming out of a more severe drought, and indicates short-term dryness. D1 indicates moderate drought, during which there will be some damage to crops and pastures, streams, reservoirs, or wells are low, and people will be asked to voluntarily use less water. D2 droughts are severe, and mean that water shortages are common and water restrictions will be imposed. The D3 category indicates extreme drought conditions, during which there will be severe crop and pasture losses and widespread water shortages. The last category, D4, is exceptional drought which indicates widespread crop and pasture loss and emergency water shortages (“What Is The U.S. Drought Monitor?”). 
 
 The authors of this map determine the weekly classifications for each region by synthesizing several inputs including the Palmer Drought Severity Index, the Standardized Precipitation Index, and other climatological inputs; the Keech-Byram Drought Index for fire, satellite-based assessments of vegetation health, and various indicators of soil moisture; and hydrologic data like the Surface Water Supply Index and snowpack data. 
 
 The map is jointly produced by the National Drought Mitigation Center at the University of Nebraska-Lincoln, the United States Department of Agriculture, and the National Oceanic and Atmospheric Administration. 
 
+The purpose of this project is to determine whether meteorological conditions impacts drought occurrence and severity. The dataset came from Kaggle, an open-source data sharing website. It combines weather data from NASA with the drought severity classification from the US Drought Monitor (from D0 to D4). The datasets were combined by county from 2019-2020 and include 18 meteorological predictors like precipitation, wind speed, humidity, and temperature (Minixhofer 2021). 
+
 
 ## Exploratory Data Analysis
+
+The output below shows the data frame analyzed in this report after omitting all of the null values.
 
 ```{r}
 droughts <- na.omit(droughts)
 print(droughts)
 ```
+
+Below is a histogram of all of the drought scores in the response column. The data is clustered around the integer values, but some entries include decimals. Because this dataset is a combination of several datasets, there is some discrepancy in how the score column was calculated. Some collectors used integer values for the drought score, while other included decimals. Because of this discrepancy, two models were created that measure the impacts of meteorological data on the the drought score; one of which categorizes the drought score into five classes by rounding to the nearest integer and the other of which uses the score column as is (as a clustered numerical response variable).
+
+```{r}
+ggplot(data = droughts, aes(x = score)) + geom_histogram() + labs(x = "Droughts", title = "Count of Droughts in US from 2019-2020")
+```
+
+Due to the clustering, the ordinal regression model was created that uses the rounded drought score, created with the mutate method below. The output shows the number of droughts in each category, which is highly skewed to the right. 
+
+```{r}
+droughts <- droughts %>%
+  mutate(score_r = round(score))
+  table(droughts$score_r)
+```
+
+The graph below shows the relationship between precipitation and drought score. It is hypothesized that the precipitation predictor would have the most significant impact on drought score. While the graph indicates that less precipitation is likely related to worsening droughts, the relationship isn't as strong as was expected. 
+
+```{r}
+ggplot(data = droughts, aes(x = PRECTOT, y = score)) + geom_jitter(size = 0.05, alpha = 0.25) + labs(x = "Precipitation (mm/day)", y = "Drought Severity", title = "Precipitation and Droughts")
+```
+
+
+### Tests of collinearity
+
+Several meteorological predictors have been found to be highly collinear. The graphs below test for collinearity and will inform the predictors used in the final model.
+
+The scatter plot below shows the relationship between the log of precipitation and humidity. It shows no significant collinearity.
+
+```{r}
+ggplot(data = droughts, aes(x = log(PRECTOT+1), y = QV2M)) + geom_jitter(size = 0.05, alpha = 0.25) + labs(x = "Precipitation (mm/day)", y = "Humidity", title = "Precipitation and Humidity")
+```
+
+The scatter plot below shows the relationship between surface pressure and humidity. It shows a slight collinearity.
+
+```{r}
+ggplot(data = droughts, aes(x = PS, y = QV2M)) + geom_jitter(size = 0.05, alpha = 0.25) + labs(x = "Surface Pressure (kPa)", y = "Humidity", title = "Surface Pressure and Humidity")
+```
+
+The scatter plot below shows the relationship between temperature and humidity. It shows a strong collinearity. These predictors should not be used together in a model.
+
+```{r}
+ggplot(data = droughts, aes(x = T2M, y = QV2M)) + geom_jitter(size = 0.05, alpha = 0.25) + labs(x = "Temperature (C)", y = "Humidity", title = "Temperature and Humidity")
+```
+
+The scatter plot below shows the relationship between surface pressure and wind speed. It shows a slight collinearity.
+
+```{r}
+ggplot(data = droughts, aes(x = PS, y = WS10M)) + geom_jitter(size = 0.05, alpha = 0.25) + labs(x = "Surface Pressure (kPa)", y = "Wind Speed (m/s)", title = "Pressure and Wind Speed")
+```
+
+Due to severe collinearity between several of the meteorological predictors, these regression models used only precipitation, wind speed at 10 meters above the canopy, and temperature at 2 meters above the canopy.
+
+
+## Ordinal Logistic Regression
+
+The first model is an ordinal logistic regression model. Like other regression models, it determines the impact of the explanatory variables on a response variable. Ordinal Logistic Regression is unique because its response variable is an ordered categorical variable. In other words, the model accounts for the fact that the order of the categories in the response is meaningful. In this case the drought score goes from least to most severe as the number increases. One important assumption made my ordinal logistic regression models is the parallel slopes assumption. This model assumes that the relationships between all pairs of responses are the same. For example, the relationship between D0 and D3 is the same as the relationship between D1 and D4. This assumption means the models only produces one set of coefficients, rather than several sets that compare each response category to all of the rest (“ORDINAL LOGISTIC REGRESSION | R DATA ANALYSIS EXAMPLES,” 2014).
+
+
+```{r}
+droughts_copy <- droughts[complete.cases(droughts),]
+
+droughts_copy$score_olr <- factor(droughts_copy$score_r, levels = c(0, 1, 2, 3, 4, 5), labels = c("None", "D0", "D1", "D2", "D3", "D4") )
+```
+
+```{r}
+train_rows <- createDataPartition(score_olr, p = 0.5, list = FALSE)
+droughts_train <- droughts_copy[train_rows, ]
+droughts_test <- droughts_copy[-train_rows, ]
+```
+
+```{r}
+droughts_olr <- train(score_olr ~ PRECTOT + WS10M + T2M,
+                     data = droughts_train,
+                     method = "polr")
+summary(droughts_olr)
+```
+
+The values of this model result in the following conclusions.
+
+For every 1 mm increase in precipitation, assuming that the other predictors remain constant, the log odds of an increase in drought go down by 0.020. 
+
+For every 1 m/s increase in wind speed, assuming that the other predictors remain constant, the log odds of an increase in drought go down by 0.005. 
+
+For every 1 degree C increase in temperature, assuming that the other predictors remain constant, the log odds of an increase in drought go up by 0.025. 
+
+```{r}
+preds_drought_olr <- predict(droughts_olr, newdata = droughts_test)
+
+postResample(preds_drought_olr, droughts_test$score_olr)
+```
+
+The output above gives the accuracy of the ordinal logistic regression model. This ordinal logistic regression models correctly predicts the drought score 76.92% of the time. 
+
+The kappa value rates the interrater reliability. In other words, it tests "the extent to which data collectors (raters) assign the same score to the same variable" (Cheng 2019). That the kappa value is zero indicates very slight interrater reliability. While this output is not ideal, it is to be expected given that this dataset was compiled from several others. 
+
+The graph below shows the variable importance of the three predictors in the OLR model. Temperature was the most important predictor, followed by precipitation and wind speed.
+
+```{r}
+imp <- varImp(droughts_olr, scale = FALSE)
+ggplot(imp)
+```
+
+
+## Lasso Regression
+
+The second model is a lasso regression model. It also determines the impact of the several predictor variables on a response variable, but in this model the response variable is numerical. Lasso regression models are unique because they use shrinkage to eliminate less relevant parameters. In other words, the model will disregard predictors that are not significant. 
+
+The code chunk below standardizes all of the predictors for the lasso regression model.
+
+```{r}
+# Standardize Variables
+
+droughts_lr <- droughts
+
+droughts_lr$WS50M_RANGE <- (droughts$WS50M_RANGE - mean(droughts$WS50M_RANGE))/sd(droughts$WS50M_RANGE)
+
+droughts_lr$WS50M_MIN <- (droughts$WS50M_MIN - mean(droughts$WS50M_MIN))/sd(droughts$WS50M_MIN)
+
+droughts_lr$WS50M_MAX <- (droughts$WS50M_MAX - mean(droughts$WS50M_MAX))/sd(droughts$WS50M_MAX)
+
+droughts_lr$WS50M <- (droughts$WS50M - mean(droughts$WS50M))/sd(droughts$WS50M)
+
+droughts_lr$WS10M_RANGE <- (droughts$WS10M_RANGE - mean(droughts$WS10M_RANGE))/sd(droughts$WS10M_RANGE)
+
+droughts_lr$WS10M_MIN <- (droughts$WS10M_MIN - mean(droughts$WS10M_MIN))/sd(droughts$WS10M_MIN)
+
+droughts_lr$WS10M_MAX <- (droughts$WS10M_MAX - mean(droughts$WS10M_MAX))/sd(droughts$WS10M_MAX)
+
+droughts_lr$WS10M <- (droughts$WS10M - mean(droughts$WS10M))/sd(droughts$WS10M)
+
+droughts_lr$TS <- (droughts$TS - mean(droughts$TS))/sd(droughts$TS)
+
+droughts_lr$T2M_RANGE <- (droughts$T2M_RANGE - mean(droughts$T2M_RANGE))/sd(droughts$T2M_RANGE)
+
+droughts_lr$T2M_MIN <- (droughts$T2M_MIN - mean(droughts$T2M_MIN))/sd(droughts$T2M_MIN)
+
+droughts_lr$T2M_MAX <- (droughts$T2M_MAX - mean(droughts$T2M_MAX))/sd(droughts$T2M_MAX)
+
+droughts_lr$T2MWET <- (droughts$T2MWET - mean(droughts$T2MWET))/sd(droughts$T2MWET)
+
+droughts_lr$T2MDEW <- (droughts$T2MDEW - mean(droughts$T2MDEW))/sd(droughts$T2MDEW)
+
+droughts_lr$T2M <- (droughts$T2MDEW - mean(droughts$T2MDEW))/sd(droughts$T2MDEW)
+
+droughts_lr$QV2M <- (droughts$QV2M - mean(droughts$QV2M))/sd(droughts$QV2M)
+
+droughts_lr$PS <- (droughts$PS - mean(droughts$PS))/sd(droughts$PS)
+
+droughts_lr$PRECTOT <- (droughts$PRECTOT - mean(droughts$PRECTOT))/sd(droughts$PRECTOT)
+```
+
+The code chunk below splits the dataset into a training and testing set. 
+
+```{r}
+train_rows <- createDataPartition(droughts_lr$score, p = 0.5, list = FALSE)
+droughts_train <- droughts_lr[train_rows, ]
+droughts_test <- droughts_lr[-train_rows, ]
+```
+
+```{r}
+X  <- model.matrix(score ~ PRECTOT + WS10M + T2M, data = droughts_lr)
+y <- droughts_lr$score
+```
+
+```{r}
+X_train <- model.matrix(score ~ PRECTOT + WS10M + T2M, data = droughts_train)
+X_train <- X_train[]
+
+y_train <- droughts_train$score
+
+X_test <- model.matrix(score ~ PRECTOT + WS10M + T2M, data = droughts_lr)
+X_test <- X_test[]
+
+y_test <- droughts_test$score
+```
+
+Lasso regression uses a lambda value to determine which predictors are useful, and which aren’t. The graph on the left shows the coefficient values for each of the predictors at different lambda values. As you can see, as lambda increases, the coefficient values shrink towards 0. The model chooses the best lambda by calculating which value would have the lowest mean squared-error.
+
+```{r}
+grid <- 10^seq(from = 5, to = -6, length = 200)
+
+lasso_mod_train <- glmnet(X_train, y_train, alpha = 1,
+                          lambda = grid, thresh = 1e-12)
+
+autoplot(lasso_mod_train, xvar = "lambda") + labs(title = "Lambda Values")
+```
+
+```{r}
+set.seed(1)
+cv_out_lasso <- cv.glmnet(X_train, y_train, alpha = 0.5)
+autoplot(cv_out_lasso)
+```
+
+```{r}
+best_lambda_lasso <- cv_out_lasso$lambda.min
+best_lambda_lasso
+```
+
+ The lambda value for this model is 0.00054. 
+
+```{r}
+lasso_pred4 <- predict(lasso_mod_train, s = best_lambda_lasso, newx = X_test)
+mean((lasso_pred4 - y_test)^2)
+```
+
+The mean-squared error of this regression model is 0.63, which is relatively small indicating that the model is fairly predictive.
+
+```{r}
+lasso_mod_final <- glmnet(X, y, alpha = 1)
+lasso_predict <- predict(lasso_mod_final, type= "coefficients", s = best_lambda_lasso)
+lasso_predict
+```
+
+All three predictors, precipitation, wind speed, and temperature were used in the final lasso regression model. No predictors were removed from the model with shrinkage.
+
+As precipitation goes up by 1 mm, the drought severity is expected to go up by 0.0043.
+
+As wind speed goes up by 1 m/s, the drought severity is expected to go down by 0.049.
+
+As temperature goes up by 1 degree C, drought severity is expected to go down by 0.104.
+
+## Discussion and Conclusions
+
+Each model calculated different coefficients for each of the three predictors. The models predicted the same general relationship for wind speed, that an increase in wind speed leads to a decrease in drought severity. The models predicted opposite relationships for precipitation and temperature with drought. 
+  
+According to the National Drought Mitigation center, predicting drought depends on forecasting two things: precipitation and temperature. The ordinal logistic regression model predicted that an increase in precipitation decreases drought severity, which agrees with other studies about precipitation and drought. The logistic regression model predicted the opposite relationship, which was highly unexpected. Precipitation was not a very important predictor in either model, though, which was a surprising result. The variation in average precipitation between different regions and the unpredictability of changes in precipitation patterns likely explain why precipitation wasn't very predictive. 
+
+The United States Geological Survey found that higher wind speeds are associated with higher rates of evapotranspiration, meaning that high winds cause more water to evaporate from soils and worsen drought conditions. In fact almost all published literature has found that stronger winds mean more severe droughts. These models, though, predict that higher wind speeds mean less severe drought conditions, which contrasts more common conclusions about the relationship between wind and drought. 
+
+Several studies have found that high temperatures are correlated with drier drought conditions, particularly during local growing seasons. Other studies found that some droughts are correlated with lower than average surface temperatures (McNab and Karl 1991). In the ordinal logistic regression model, temperature was highly predictive of worsening drought conditions, adding to the conclusion that drought is worsened by warming temperatures. In the lasso regression model, temperature was predictive of less severe drought conditions. This difference is likely due to the wide range of correlations between temperature and drought, that may be region specific.
+
+Several studies have been conducted about the relationship between weather and climate and drought conditions (“Drought and Climate Change," 2020; McNab and Karl 1991). However, this model uses data from 2019 and 2020 to create predictive model for drought severity specific to the United States. The coefficients of these models confirm the results of several previous studies, and add a predictive component to more general correlations. If an accurate model was created that used weather and climate data to predict when droughts would occur and how severe they would be, water and other resources managers could make more informed allocation decisions. Regions that are predicted to have droughts could implement water restrictions earlier, to reduce the impacts of drought on food and energy production, public health, and wildlife populations. 
+
+Both of these models have several limitations. A more thorough exploration needs to be conducted of other possible collinearities. Collinearities could explain the unusual results of these models with wind speed, or the results of the lasso regression for precipitation and temperature. Several predictors were eliminated due to collinearity, which could also explain these unusual results. Lastly, the dataset was combined from several others, which led to inconsistency with data entry. 
+
+Future research should look to further explain the complex relationships between these predictors and drought severity. It should also aim to add other variables to these models that would improve their ability to predict drought conditions. Next, future research should work on identifying the true connection between wind speed and drought conditions. Models should be created that are region specific, to determine whether these relationships are specific to certain areas. Lastly, other statistical models should be created to determine which are most effective at predicting droughts.
+
+
+## References
+
+Chen, Yingting Sherry. “Interpretation of Kappa Values.” Medium, Towards Data Science, 6 July 2019.
+
+“Drought and Climate Change.” Center for Climate and Energy Solutions, Center for Climate and Energy Solutions, 16 Apr. 2020.
+
+“Droughts: Things to Know.” USGS: Science for a Changing World, U.S. Department of the Interior.
+
+McNab, Alan L, and Thomas R Karl. “Climate and Droughts.” Impact of Climate Change and Land Use in the Southwestern United States, USGS, 1991.
+
+Minixhofer, Christoph. “Predict Droughts Using Weather & Soil Data.” Kaggle, Kaggle, 3 Mar. 2021.
+
+“ORDINAL LOGISTIC REGRESSION | R DATA ANALYSIS EXAMPLES.” UCLA Institute for Digital Research and Education, UCLA: Statistical Consulting Group, 2014.
+
+“Predicting Drought.” National Drought Mitigation Center, University Of Nebraska-Lincoln, 2021.
+
+“What Is The U.S. Drought Monitor?” U.S. Drought Monitor, The National Drought Mitigation Center, 2021.
+
+Wolchover, Natalie. “What Is a Drought?” LiveScience, Future US, 28 Sept. 2018.
+
+

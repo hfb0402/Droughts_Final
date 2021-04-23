@@ -51,10 +51,13 @@ The authors of this map determine the weekly classifications for each region by 
 
 The map is jointly produced by the National Drought Mitigation Center at the University of Nebraska-Lincoln, the United States Department of Agriculture, and the National Oceanic and Atmospheric Administration. 
 
+## Methods and Results
+
 The purpose of this project is to determine whether meteorological conditions impacts drought occurrence and severity. The dataset came from Kaggle, an open-source data sharing website. It combines weather data from NASA with the drought severity classification from the US Drought Monitor (from D0 to D4). The datasets were combined by county from 2019-2020 and include 18 meteorological predictors like precipitation, wind speed, humidity, and temperature (Minixhofer 2021). 
 
+Two models were created, an Oridnal Logisitc Regression Model and a Lasso Regression Model. The same predictors were used for both after finding severe collinearity between several of the initial predictors. The explanations of these specific models, the development code, and the results of both models are below. 
 
-## Exploratory Data Analysis
+### Exploratory Data Analysis
 
 The output below shows the data frame analyzed in this report after omitting all of the null values.
 
